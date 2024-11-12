@@ -1,25 +1,33 @@
 import * as Extensions from "trimble-connect-project-workspace-api";
 
-// Conectarse a la API de Trimble Connect
-Extensions.connect(
-  window.parent,
-  (event, args) => {
-    switch (event) {
-      case "extension.command":
-        console.log("Comando ejecutado por el usuario:", args.data);
-        break;
-      case "extension.accessToken":
-        console.log("Token de acceso o estado:", args.data);
-        break;
-      case "extension.userSettingsChanged":
-        console.log("Configuración de usuario cambiada");
-        break;
-      default:
-        console.log("Evento no reconocido:", event);
-    }
-  },
-  30000 // Tiempo de espera de conexión en milisegundos
-);
+(async () => {
+  // Conexión a la API
+  const API = await Extensions.connect(
+    window.parent,
+    (event, args) => {
+      switch (event) {
+        case "extension.command":
+          if (args.data === "main_nav_menu_clicked") {
+            console.log("Botón del menú principal clickeado");
+            // Aquí puedes agregar más funcionalidades si lo deseas
+          }
+          break;
+        default:
+          console.log("Evento no reconocido:", event);
+      }
+    },
+    30000 // Tiempo de espera de conexión
+  );
 
-// Puedes agregar funciones adicionales para manejar eventos o agregar interactividad en el futuro
-console.log("Extensión inicializada");
+  // Definir el menú principal
+  const mainMenuObject = {
+    title: "Mi Extensión de Empresa",
+    icon: "https://jamess166.github.io/trimble_connect_dashboard/logo.png",  // Ícono del botón en la barra lateral
+    command: "main_nav_menu_clicked",
+  };
+
+  // Asignar el menú a la interfaz de usuario de Trimble Connect
+  API.ui.setMenu(mainMenuObject);
+
+  console.log("Menú cargado en la barra lateral");
+})();
