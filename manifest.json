@@ -1,7 +1,7 @@
 {
-    "icon": "https://github.com/jamess166/trimble_connect_dashboard/new/main/logo.png",
+    "icon": "https://jamess166.github.io/trimble_connect_dashboard/logo.png",
     "title": "Mi Extensión de Ejemplo",
-    "url": "https://github.com/jamess166/trimble_connect_dashboard/new/main/index.html",
+    "url": "https://jamess166.github.io/trimble_connect_dashboard/index.html",
     "description": "Esta es una extensión de prueba para Trimble Connect",
     "configCommand": "configuracion_comando",
     "enabled": true
