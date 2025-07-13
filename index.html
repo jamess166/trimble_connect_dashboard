@@ -1,41 +1,90 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Filtros de Modelo Avanzados</title>
-    <link rel="stylesheet" href="css/styles.css" />
-    <link rel="icon" href="logo.png" type="image/png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Filtros de Modelo Avanzados</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="logo.png" type="image/png">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="logo.png" alt="Logo" style="height: 50px; margin-bottom: 10px;">
-            <h1>🔍 Filtros de Modelo Avanzados</h1>
-            <p>Filtra tus modelos por PR-NIVEL, PO-CARS, PO-SECTOR y PO-WBS</p>
-        </div>
-
-        <div class="filters-panel">
-            <!-- contenido de filtros (copiar desde el HTML que ya tienes) -->
-        </div>
-
-        <label class="isolate-toggle">
-            <input type="checkbox" id="isolate-filtered">
-            Mostrar solo elementos filtrados
-        </label>
-
-        <div class="results-panel">
-            <div class="results-header">
-                <h3>Resultados</h3>
-                <span class="results-count" id="results-count">0 modelos encontrados</span>
-            </div>
-            <div id="loading" class="loading" style="display: none;">Cargando modelos...</div>
-            <div id="error-message" class="error" style="display: none;"></div>
-            <div id="model-grid" class="model-grid"></div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <img src="logo.png" alt="Logo Cesel" style="height: 100px; margin-bottom: 0px;">
+      <h6>V1.0.0.2</h6>
     </div>
 
-    <script src="https://components.connect.trimble.com/trimble-connect-workspace-api/trimble-connect-workspace-api.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <div class="filters-panel">
+      <div class="filter-section">
+        <h3>Filtros de Atributos</h3>
+        <div class="filter-group">
+          <div class="filter-item">
+            <label for="pr-nivel">PR-NIVEL</label>
+            <select id="pr-nivel" multiple>
+              <option value="">Todos los niveles</option>
+            </select>
+          </div>
+
+          <div class="filter-item">
+            <label for="po-cars">PO-CARS</label>
+            <select id="po-cars" multiple>
+              <option value="">Todas las categorías</option>
+            </select>
+          </div>
+
+          <div class="filter-item">
+            <label for="po-sector">PO-SECTOR</label>
+            <select id="po-sector" multiple>
+              <option value="">Todos los sectores</option>
+            </select>
+          </div>
+
+          <div class="filter-item">
+            <label for="po-wbs">PO-WBS</label>
+            <select id="po-wbs" multiple>
+              <option value="">Todos los WBS</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3>Filtros Adicionales</h3>
+        <div class="filter-group">
+          <div class="filter-item">
+            <label for="search-text">Búsqueda por texto</label>
+            <input type="text" id="search-text" placeholder="Buscar en nombre o descripción..." />
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-primary" id="btn-aplicar">🔍 Aplicar Filtros</button>
+        <button class="btn btn-secondary" id="btn-limpiar">🗑️ Limpiar Filtros</button>
+        <!-- <button class="btn btn-secondary" id="btn-diagnostico">🔧 Diagnóstico</button> -->
+      </div>
+    </div>
+
+    <label class="isolate-toggle">
+      <input type="checkbox" id="isolate-filtered" />
+      Mostrar solo elementos filtrados
+    </label>
+
+    <div class="results-panel">
+      <div class="results-header">
+        <h3>Resultados</h3>
+        <span class="results-count" id="results-count">0 modelos encontrados</span>
+      </div>
+      <div id="loading" class="loading" style="display: none;">Cargando modelos...</div>
+      <div id="error-message" class="error" style="display: none;"></div>
+      <div id="model-grid" class="model-grid"></div>
+    </div>
+  </div>
+
+  <!-- API Trimble -->
+  <script src="https://components.connect.trimble.com/trimble-connect-workspace-api/index.js"></script>
+
+  <!-- Tu app -->
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

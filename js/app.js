@@ -1,31 +1,47 @@
-import { inicializarTrimble, cargarModelos } from './trimble-api.js';
+import { inicializarAPI, cargarModelos } from './trimble-api.js';
 import { cargarOpcionesFiltros, aplicarFiltros, limpiarFiltros } from './filtros.js';
-import { mostrarResultados, mostrarMensaje, mostrarError } from './ui.js';
+import { mostrarResultados, mostrarError } from './ui.js';
 
 let workspaceAPI = null;
 let allModels = [];
 let filteredModels = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        workspaceAPI = await inicializarTrimble();
-        allModels = await cargarModelos(workspaceAPI);
-        filteredModels = [...allModels];
-        await cargarOpcionesFiltros(allModels);
-        mostrarResultados(filteredModels);
+  try {
+    console.log("Esperando conexión con TrimbleConnectWorkspace...");
+    const api = await inicializarAPI();
+    workspaceAPI = api.workspaceAPI;
 
-        document.querySelector('.btn-primary').addEventListener('click', () => {
-            filteredModels = aplicarFiltros(allModels, workspaceAPI);
-            mostrarResultados(filteredModels);
-        });
+    console.log("Cargando modelos IFC...");
+    allModels = await cargarModelos(workspaceAPI);
+    filteredModels = [...allModels];
 
-        document.querySelector('.btn-secondary').addEventListener('click', () => {
-            limpiarFiltros();
-            filteredModels = [...allModels];
-            mostrarResultados(filteredModels);
-        });
+    console.log("Cargando opciones de filtros...");
+    await cargarOpcionesFiltros(allModels);
+    mostrarResultados(filteredModels);
 
-    } catch (error) {
-        mostrarError(error.message);
+    // ✅ Eventos con IDs únicos
+    document.getElementById('btn-aplicar').addEventListener('click', () => {
+      filteredModels = aplicarFiltros(allModels, workspaceAPI);
+      mostrarResultados(filteredModels);
+    });
+
+    document.getElementById('btn-limpiar').addEventListener('click', () => {
+      limpiarFiltros();
+      filteredModels = [...allModels];
+      mostrarResultados(filteredModels);
+    });
+
+    const btnDiag = document.getElementById('btn-diagnostico');
+    if (btnDiag) {
+      btnDiag.addEventListener('click', () => {
+        console.log("Diagnóstico - Total modelos:", allModels.length);
+        console.log("Filtrados actualmente:", filteredModels.length);
+      });
     }
+
+  } catch (err) {
+    console.error("Error inicializando extensión:", err);
+    mostrarError(err.message);
+  }
 });

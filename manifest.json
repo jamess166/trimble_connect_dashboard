@@ -1,15 +1,6 @@
 {
-    "icon": "https://jamess166.github.io/trimble_connect_dashboard/logo.png",
-    "title": "Filtros de Modelo Avanzados",
-    "url": "https://jamess166.github.io/trimble_connect_dashboard/index.html",
-    "description": "Extensión para filtrar modelos por atributos PR-NIVEL, PO-CARS, PO-SECTOR, PO-WBS",
-    "configCommand": "abrir_configuracion",
-    "enabled": true,
-    "version": "1.0.0",
-    "author": "Mi Empresa",
-    "permissions": [
-        "models.read",
-        "projects.read",
-        "objects.read"
-    ]
+  "url": "https://jamess166.github.io/trimble_connect_dashboard/index.html",
+  "title": "Filtros IFC",
+  "icon": "https://jamess166.github.io/trimble_connect_dashboard/logo.png",
+  "infoUrl": "https://jamess166.github.io/trimble_connect_dashboard/help.html"
 }
