@@ -3,13 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Extensión de Empresa</title>
-    <link rel="stylesheet" href="style.css"> <!-- Enlace al archivo CSS -->
+    <title>Filtros de Modelo Avanzados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .filters-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .filter-item select,
+        .filter-item input {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-item select:focus,
+        .filter-item input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .results-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .model-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .model-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .model-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .model-attributes {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .model-attributes span {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 3px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .filter-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="logo-container">
-        <img src="logo.png" alt="Logo de Empresa" class="logo"> <!-- URL del logo -->
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Filtros de Modelo Avanzados</h1>
+            <p>Filtra tus modelos por PR-NIVEL, PO-CARS, PO-SECTOR y PO-WBS</p>
+        </div>
+
+        <div class="filters-panel">
+            <div class="filter-section">
+                <h3>Filtros de Atributos</h3>
+                
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label for="pr-nivel">PR-NIVEL</label>
+                        <select id="pr-nivel" multiple>
+                            <option value="">Todos los niveles</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="po-cars">PO-CARS</label>
+                        <select id="po-cars" multiple>
+                            <option value="">Todas las categorías</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="po-sector">PO-SECTOR</label>
+                        <select id="po-sector" multiple>
+                            <option value="">Todos los sectores</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="po-wbs">PO-WBS</label>
+                        <select id="po-wbs" multiple>
+                            <option value="">Todos los WBS</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Filtros Adicionales</h3>
+                
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label for="search-text">Búsqueda por texto</label>
+                        <input type="text" id="search-text" placeholder="Buscar en nombre o descripción...">
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="model-type">Tipo de Modelo</label>
+                        <select id="model-type">
+                            <option value="">Todos los tipos</option>
+                            <option value="ifc">IFC</option>
+                            <option value="skp">SketchUp</option>
+                            <option value="3dm">Rhino</option>
+                            <option value="dwg">AutoCAD</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    🔍 Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="limpiarFiltros()">
+                    🗑️ Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+        <div class="results-panel">
+            <div class="results-header">
+                <h3>Resultados</h3>
+                <span class="results-count" id="results-count">0 modelos encontrados</span>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <p>Cargando modelos...</p>
+            </div>
+            
+            <div id="error-message" class="error" style="display: none;"></div>
+            
+            <div id="model-grid" class="model-grid">
+                <!-- Los modelos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
     </div>
-    <script src="app.js"></script> <!-- Enlace al archivo JavaScript -->
+
+    <script src="https://components.connect.trimble.com/trimble-connect-workspace-api/trimble-connect-workspace-api.js"></script>
+    <script>
+        // Variables globales
+        let workspaceAPI;
+        let currentProject;
+        let allModels = [];
+        let filteredModels = [];
+
+        // Inicializar la extensión
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeExtension();
+        });
+
+        async function initializeExtension() {
+            try {
+                // Inicializar la API de Trimble Connect
+                workspaceAPI = new TrimbleConnectWorkspace.WorkspaceAPI();
+                
+                // Obtener información del proyecto actual
+                currentProject = await workspaceAPI.getProject();
+                console.log('Proyecto actual:', currentProject);
+                
+                // Cargar modelos
+                await cargarModelos();
+                
+                // Cargar opciones de filtros
+                await cargarOpcionesFiltros();
+                
+                mostrarMensaje('Extensión cargada correctamente', 'success');
+                
+            } catch (error) {
+                console.error('Error inicializando extensión:', error);
+                mostrarError('Error al conectar con Trimble Connect: ' + error.message);
+            }
+        }
+
+        async function cargarModelos() {
+            try {
+                mostrarCargando(true);
+                
+                // Obtener todos los modelos del proyecto
+                const models = await workspaceAPI.getModels();
+                allModels = models || [];
+                
+                // Procesar modelos para extraer atributos
+                for (let model of allModels) {
+                    try {
+                        const attributes = await workspaceAPI.getModelAttributes(model.id);
+                        model.attributes = attributes;
+                    } catch (error) {
+                        console.warn('No se pudieron obtener atributos para modelo:', model.id);
+                        model.attributes = {};
+                    }
+                }
+                
+                filteredModels = [...allModels];
+                mostrarResultados();
+                
+            } catch (error) {
+                console.error('Error cargando modelos:', error);
+                mostrarError('Error al cargar modelos: ' + error.message);
+            } finally {
+                mostrarCargando(false);
+            }
+        }
+
+        async function cargarOpcionesFiltros() {
+            try {
+                const atributos = {
+                    'PR-NIVEL': new Set(),
+                    'PO-CARS': new Set(),
+                    'PO-SECTOR': new Set(),
+                    'PO-WBS': new Set()
+                };
+
+                // Extraer valores únicos de cada atributo
+                allModels.forEach(model => {
+                    if (model.attributes) {
+                        Object.keys(atributos).forEach(key => {
+                            if (model.attributes[key]) {
+                                atributos[key].add(model.attributes[key]);
+                            }
+                        });
+                    }
+                });
+
+                // Poblar los selectores
+                Object.keys(atributos).forEach(key => {
+                    const select = document.getElementById(key.toLowerCase().replace('-', '-'));
+                    if (select) {
+                        // Limpiar opciones existentes (excepto la primera)
+                        while (select.children.length > 1) {
+                            select.removeChild(select.lastChild);
+                        }
+                        
+                        // Añadir nuevas opciones
+                        Array.from(atributos[key]).sort().forEach(valor => {
+                            const option = document.createElement('option');
+                            option.value = valor;
+                            option.textContent = valor;
+                            select.appendChild(option);
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error cargando opciones de filtros:', error);
+            }
+        }
+
+        function aplicarFiltros() {
+            try {
+                const filtros = {
+                    'PR-NIVEL': Array.from(document.getElementById('pr-nivel').selectedOptions).map(o => o.value).filter(v => v),
+                    'PO-CARS': Array.from(document.getElementById('po-cars').selectedOptions).map(o => o.value).filter(v => v),
+                    'PO-SECTOR': Array.from(document.getElementById('po-sector').selectedOptions).map(o => o.value).filter(v => v),
+                    'PO-WBS': Array.from(document.getElementById('po-wbs').selectedOptions).map(o => o.value).filter(v => v),
+                    searchText: document.getElementById('search-text').value.toLowerCase(),
+                    modelType: document.getElementById('model-type').value
+                };
+
+                filteredModels = allModels.filter(model => {
+                    // Filtrar por atributos específicos
+                    for (let key of Object.keys(filtros)) {
+                        if (key === 'searchText' || key === 'modelType') continue;
+                        
+                        if (filtros[key].length > 0) {
+                            const modelValue = model.attributes && model.attributes[key];
+                            if (!modelValue || !filtros[key].includes(modelValue)) {
+                                return false;
+                            }
+                        }
+                    }
+
+                    // Filtrar por texto de búsqueda
+                    if (filtros.searchText) {
+                        const searchIn = (model.name || '').toLowerCase() + ' ' + (model.description || '').toLowerCase();
+                        if (!searchIn.includes(filtros.searchText)) {
+                            return false;
+                        }
+                    }
+
+                    // Filtrar por tipo de modelo
+                    if (filtros.modelType) {
+                        const extension = model.name ? model.name.split('.').pop().toLowerCase() : '';
+                        if (extension !== filtros.modelType) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+                mostrarResultados();
+                
+                // Resaltar modelos filtrados en el visor 3D
+                if (workspaceAPI.highlightModels) {
+                    workspaceAPI.highlightModels(filteredModels.map(m => m.id));
+                }
+                
+            } catch (error) {
+                console.error('Error aplicando filtros:', error);
+                mostrarError('Error al aplicar filtros: ' + error.message);
+            }
+        }
+
+        function limpiarFiltros() {
+            // Limpiar todos los selectores
+            document.getElementById('pr-nivel').selectedIndex = 0;
+            document.getElementById('po-cars').selectedIndex = 0;
+            document.getElementById('po-sector').selectedIndex = 0;
+            document.getElementById('po-wbs').selectedIndex = 0;
+            document.getElementById('search-text').value = '';
+            document.getElementById('model-type').selectedIndex = 0;
+            
+            // Restaurar todos los modelos
+            filteredModels = [...allModels];
+            mostrarResultados();
+            
+            // Quitar resaltado en el visor 3D
+            if (workspaceAPI.clearHighlight) {
+                workspaceAPI.clearHighlight();
+            }
+        }
+
+        function mostrarResultados() {
+            const grid = document.getElementById('model-grid');
+            const count = document.getElementById('results-count');
+            
+            count.textContent = `${filteredModels.length} modelos encontrados`;
+            
+            if (filteredModels.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No se encontraron modelos con los filtros aplicados</p>';
+                return;
+            }
+            
+            grid.innerHTML = filteredModels.map(model => `
+                <div class="model-card" onclick="seleccionarModelo('${model.id}')">
+                    <h4>${model.name || 'Modelo sin nombre'}</h4>
+                    <p style="color: #666; font-size: 12px; margin-bottom: 10px;">${model.description || 'Sin descripción'}</p>
+                    <div class="model-attributes">
+                        ${model.attributes ? Object.entries(model.attributes).map(([key, value]) => 
+                            `<span>${key}: ${value}</span>`
+                        ).join('') : '<span>Sin atributos</span>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function seleccionarModelo(modelId) {
+            try {
+                console.log('Seleccionando modelo:', modelId);
+                
+                // Enfocar el modelo en el visor 3D
+                if (workspaceAPI.focusModel) {
+                    workspaceAPI.focusModel(modelId);
+                }
+                
+                // Seleccionar el modelo
+                if (workspaceAPI.selectModel) {
+                    workspaceAPI.selectModel(modelId);
+                }
+                
+            } catch (error) {
+                console.error('Error seleccionando modelo:', error);
+            }
+        }
+
+        function mostrarCargando(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensaje;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const div = document.createElement('div');
+            div.className = tipo;
+            div.textContent = mensaje;
+            div.style.position = 'fixed';
+            div.style.top = '20px';
+            div.style.right = '20px';
+            div.style.zIndex = '1000';
+            div.style.padding = '10px 20px';
+            div.style.borderRadius = '5px';
+            
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                document.body.removeChild(div);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>

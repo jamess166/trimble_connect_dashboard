@@ -1,8 +1,15 @@
 {
     "icon": "https://jamess166.github.io/trimble_connect_dashboard/logo.png",
-    "title": "Mi Extensión de Ejemplo",
+    "title": "Filtros de Modelo Avanzados",
     "url": "https://jamess166.github.io/trimble_connect_dashboard/index.html",
-    "description": "Esta es una extensión de prueba para Trimble Connect",
-    "configCommand": "configuracion_comando",
-    "enabled": true
+    "description": "Extensión para filtrar modelos por atributos PR-NIVEL, PO-CARS, PO-SECTOR, PO-WBS",
+    "configCommand": "abrir_configuracion",
+    "enabled": true,
+    "version": "1.0.0",
+    "author": "Mi Empresa",
+    "permissions": [
+        "models.read",
+        "projects.read",
+        "objects.read"
+    ]
 }
