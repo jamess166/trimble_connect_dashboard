@@ -320,6 +320,9 @@
                 <button class="btn btn-secondary" onclick="limpiarFiltros()">
                     🗑️ Limpiar Filtros
                 </button>
+                <button class="btn btn-secondary" onclick="mostrarDiagnostico()">
+                    🔧 Diagnóstico
+                </button>
             </div>
         </div>
 
@@ -385,14 +388,56 @@
                 const models = await workspaceAPI.getModels();
                 allModels = models || [];
                 
-                // Procesar modelos para extraer atributos
+                // Para cada modelo, obtener sus objetos y propiedades
                 for (let model of allModels) {
                     try {
-                        const attributes = await workspaceAPI.getModelAttributes(model.id);
-                        model.attributes = attributes;
-                    } catch (error) {
-                        console.warn('No se pudieron obtener atributos para modelo:', model.id);
+                        console.log('Procesando modelo:', model.name, model.id);
+                        
+                        // Obtener los objetos del modelo
+                        const objects = await workspaceAPI.getModelObjects(model.id);
+                        model.objects = objects || [];
+                        
+                        // Extraer atributos de todos los objetos del modelo
+                        const allAttributes = {};
+                        
+                        for (let obj of model.objects) {
+                            try {
+                                // Obtener propiedades del objeto
+                                const properties = await workspaceAPI.getObjectProperties(model.id, obj.id);
+                                
+                                if (properties && properties.length > 0) {
+                                    properties.forEach(prop => {
+                                        if (prop.name && prop.value) {
+                                            // Buscar nuestros atributos específicos
+                                            const attrKey = prop.name.toUpperCase();
+                                            if (attrKey.includes('PR-NIVEL') || attrKey.includes('PO-CARS') || 
+                                                attrKey.includes('PO-SECTOR') || attrKey.includes('PO-WBS')) {
+                                                
+                                                if (!allAttributes[attrKey]) {
+                                                    allAttributes[attrKey] = new Set();
+                                                }
+                                                allAttributes[attrKey].add(prop.value);
+                                            }
+                                        }
+                                    });
+                                }
+                            } catch (objError) {
+                                console.warn('Error obteniendo propiedades del objeto:', obj.id, objError);
+                            }
+                        }
+                        
+                        // Convertir Sets a arrays
                         model.attributes = {};
+                        Object.keys(allAttributes).forEach(key => {
+                            model.attributes[key] = Array.from(allAttributes[key]);
+                        });
+                        
+                        console.log('Atributos encontrados para modelo', model.name, ':', model.attributes);
+                        
+                    } catch (error) {
+                        console.warn('Error procesando modelo:', model.id, error);
+                        model.attributes = {};
+                        model.objects = [];
                     }
                 }
                 
@@ -416,20 +461,36 @@
                     'PO-WBS': new Set()
                 };
 
-                // Extraer valores únicos de cada atributo
+                // Extraer valores únicos de cada atributo de todos los modelos
                 allModels.forEach(model => {
                     if (model.attributes) {
-                        Object.keys(atributos).forEach(key => {
-                            if (model.attributes[key]) {
-                                atributos[key].add(model.attributes[key]);
+                        Object.keys(model.attributes).forEach(key => {
+                            const normalizedKey = key.toUpperCase();
+                            
+                            // Buscar coincidencias con nuestros atributos target
+                            if (normalizedKey.includes('PR-NIVEL') || normalizedKey === 'PR-NIVEL') {
+                                model.attributes[key].forEach(value => atributos['PR-NIVEL'].add(value));
+                            } else if (normalizedKey.includes('PO-CARS') || normalizedKey === 'PO-CARS') {
+                                model.attributes[key].forEach(value => atributos['PO-CARS'].add(value));
+                            } else if (normalizedKey.includes('PO-SECTOR') || normalizedKey === 'PO-SECTOR') {
+                                model.attributes[key].forEach(value => atributos['PO-SECTOR'].add(value));
+                            } else if (normalizedKey.includes('PO-WBS') || normalizedKey === 'PO-WBS') {
+                                model.attributes[key].forEach(value => atributos['PO-WBS'].add(value));
                             }
                         });
                     }
                 });
 
                 // Poblar los selectores
-                Object.keys(atributos).forEach(key => {
-                    const select = document.getElementById(key.toLowerCase().replace('-', '-'));
+                const selectores = [
+                    { id: 'pr-nivel', key: 'PR-NIVEL' },
+                    { id: 'po-cars', key: 'PO-CARS' },
+                    { id: 'po-sector', key: 'PO-SECTOR' },
+                    { id: 'po-wbs', key: 'PO-WBS' }
+                ];
+
+                selectores.forEach(selector => {
+                    const select = document.getElementById(selector.id);
                     if (select) {
                         // Limpiar opciones existentes (excepto la primera)
                         while (select.children.length > 1) {
@@ -437,17 +498,29 @@
                         }
                         
                         // Añadir nuevas opciones
-                        Array.from(atributos[key]).sort().forEach(valor => {
+                        const valores = Array.from(atributos[selector.key]).sort();
+                        console.log(`Valores encontrados para ${selector.key}:`, valores);
+                        
+                        valores.forEach(valor => {
                             const option = document.createElement('option');
                             option.value = valor;
                             option.textContent = valor;
                             select.appendChild(option);
                         });
+                        
+                        // Mostrar cuántos valores se encontraron
+                        const label = select.previousElementSibling;
+                        if (label) {
+                            label.textContent = `${selector.key} (${valores.length} valores)`;
+                        }
                     }
                 });
 
+                console.log('Resumen de atributos cargados:', atributos);
+
             } catch (error) {
                 console.error('Error cargando opciones de filtros:', error);
+                mostrarError('Error al cargar opciones de filtros: ' + error.message);
             }
         }
 
@@ -462,14 +535,31 @@
                     modelType: document.getElementById('model-type').value
                 };
 
+                console.log('Aplicando filtros:', filtros);
+
                 filteredModels = allModels.filter(model => {
                     // Filtrar por atributos específicos
-                    for (let key of Object.keys(filtros)) {
-                        if (key === 'searchText' || key === 'modelType') continue;
-                        
-                        if (filtros[key].length > 0) {
-                            const modelValue = model.attributes && model.attributes[key];
-                            if (!modelValue || !filtros[key].includes(modelValue)) {
+                    for (let filterKey of ['PR-NIVEL', 'PO-CARS', 'PO-SECTOR', 'PO-WBS']) {
+                        if (filtros[filterKey].length > 0) {
+                            let found = false;
+                            
+                            // Buscar en los atributos del modelo
+                            if (model.attributes) {
+                                Object.keys(model.attributes).forEach(attrKey => {
+                                    const normalizedKey = attrKey.toUpperCase();
+                                    if (normalizedKey.includes(filterKey) || normalizedKey === filterKey) {
+                                        // Verificar si algún valor coincide
+                                        const hasMatch = model.attributes[attrKey].some(value => 
+                                            filtros[filterKey].includes(value)
+                                        );
+                                        if (hasMatch) {
+                                            found = true;
+                                        }
+                                    }
+                                });
+                            }
+                            
+                            if (!found) {
                                 return false;
                             }
                         }
@@ -494,6 +584,7 @@
                     return true;
                 });
 
+                console.log('Modelos filtrados:', filteredModels.length, 'de', allModels.length);
                 mostrarResultados();
                 
                 // Resaltar modelos filtrados en el visor 3D
@@ -537,17 +628,32 @@
                 return;
             }
             
-            grid.innerHTML = filteredModels.map(model => `
-                <div class="model-card" onclick="seleccionarModelo('${model.id}')">
-                    <h4>${model.name || 'Modelo sin nombre'}</h4>
-                    <p style="color: #666; font-size: 12px; margin-bottom: 10px;">${model.description || 'Sin descripción'}</p>
-                    <div class="model-attributes">
-                        ${model.attributes ? Object.entries(model.attributes).map(([key, value]) => 
-                            `<span>${key}: ${value}</span>`
-                        ).join('') : '<span>Sin atributos</span>'}
+            grid.innerHTML = filteredModels.map(model => {
+                // Formatear atributos para mostrar
+                let atributosHtml = '';
+                if (model.attributes && Object.keys(model.attributes).length > 0) {
+                    Object.entries(model.attributes).forEach(([key, values]) => {
+                        if (values && values.length > 0) {
+                            atributosHtml += `<div style="margin-bottom: 5px;"><strong>${key}:</strong> ${values.join(', ')}</div>`;
+                        }
+                    });
+                } else {
+                    atributosHtml = '<span style="color: #999;">Sin atributos encontrados</span>';
+                }
+                
+                return `
+                    <div class="model-card" onclick="seleccionarModelo('${model.id}')">
+                        <h4>${model.name || 'Modelo sin nombre'}</h4>
+                        <p style="color: #666; font-size: 12px; margin-bottom: 10px;">${model.description || 'Sin descripción'}</p>
+                        <div class="model-attributes" style="font-size: 11px; color: #666;">
+                            ${atributosHtml}
+                        </div>
+                        <div style="font-size: 10px; color: #999; margin-top: 5px;">
+                            ${model.objects ? model.objects.length : 0} objetos
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function seleccionarModelo(modelId) {
@@ -599,6 +705,109 @@
             setTimeout(() => {
                 document.body.removeChild(div);
             }, 3000);
+        }
+
+        // Función de diagnóstico para identificar propiedades disponibles
+        async function mostrarDiagnostico() {
+            try {
+                mostrarCargando(true);
+                
+                const diagnostico = {
+                    totalModelos: allModels.length,
+                    modelosConObjetos: 0,
+                    totalObjetos: 0,
+                    propiedadesEncontradas: new Set(),
+                    ejemplosPropiedades: {}
+                };
+                
+                for (let model of allModels) {
+                    if (model.objects && model.objects.length > 0) {
+                        diagnostico.modelosConObjetos++;
+                        diagnostico.totalObjetos += model.objects.length;
+                        
+                        // Analizar las primeras 5 objetos de cada modelo
+                        const objetosAAnalizar = model.objects.slice(0, 5);
+                        
+                        for (let obj of objetosAAnalizar) {
+                            try {
+                                const properties = await workspaceAPI.getObjectProperties(model.id, obj.id);
+                                
+                                if (properties && properties.length > 0) {
+                                    properties.forEach(prop => {
+                                        if (prop.name && prop.value) {
+                                            diagnostico.propiedadesEncontradas.add(prop.name);
+                                            
+                                            // Guardar ejemplos de las propiedades que nos interesan
+                                            const propName = prop.name.toUpperCase();
+                                            if (propName.includes('NIVEL') || propName.includes('CARS') || 
+                                                propName.includes('SECTOR') || propName.includes('WBS')) {
+                                                
+                                                if (!diagnostico.ejemplosPropiedades[prop.name]) {
+                                                    diagnostico.ejemplosPropiedades[prop.name] = [];
+                                                }
+                                                
+                                                if (!diagnostico.ejemplosPropiedades[prop.name].includes(prop.value)) {
+                                                    diagnostico.ejemplosPropiedades[prop.name].push(prop.value);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            } catch (error) {
+                                console.warn('Error obteniendo propiedades:', error);
+                            }
+                        }
+                    }
+                }
+                
+                // Mostrar diagnóstico en el panel de resultados
+                const grid = document.getElementById('model-grid');
+                const propiedadesArray = Array.from(diagnostico.propiedadesEncontradas).sort();
+                
+                grid.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 12px;">
+                        <h3 style="color: #333; margin-bottom: 15px; font-family: 'Segoe UI', sans-serif;">📊 Diagnóstico del Modelo</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <strong>Resumen:</strong><br>
+                            • Total de modelos: ${diagnostico.totalModelos}<br>
+                            • Modelos con objetos: ${diagnostico.modelosConObjetos}<br>
+                            • Total de objetos analizados: ${diagnostico.totalObjetos}<br>
+                            • Propiedades únicas encontradas: ${propiedadesArray.length}
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <strong>Propiedades relacionadas encontradas:</strong><br>
+                            ${Object.keys(diagnostico.ejemplosPropiedades).length > 0 ? 
+                                Object.entries(diagnostico.ejemplosPropiedades).map(([prop, values]) => 
+                                    `• <span style="color: #667eea;">${prop}</span>: ${values.slice(0, 3).join(', ')}${values.length > 3 ? '...' : ''}`
+                                ).join('<br>') : 
+                                '❌ No se encontraron propiedades con NIVEL, CARS, SECTOR o WBS'
+                            }
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <strong>Todas las propiedades encontradas (primeras 50):</strong><br>
+                            <div style="max-height: 200px; overflow-y: auto; background: white; padding: 10px; border-radius: 4px;">
+                                ${propiedadesArray.slice(0, 50).map(prop => `• ${prop}`).join('<br>')}
+                                ${propiedadesArray.length > 50 ? `<br>... y ${propiedadesArray.length - 50} más` : ''}
+                            </div>
+                        </div>
+                        
+                        <button onclick="location.reload()" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            🔄 Recargar Extensión
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('results-count').textContent = 'Diagnóstico completado';
+                
+            } catch (error) {
+                console.error('Error en diagnóstico:', error);
+                mostrarError('Error al ejecutar diagnóstico: ' + error.message);
+            } finally {
+                mostrarCargando(false);
+            }
         }
     </script>
 </body>
