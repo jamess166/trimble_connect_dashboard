@@ -3,81 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Filtros de Modelo Avanzados</title>
+  <title>Filtro por Nivel</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="logo.png" type="image/png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #0066cc;
+      padding-bottom: 10px;
+    }
+
+    .header img {
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    .filter-section {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .filter-section h3 {
+      color: #0066cc;
+      margin-bottom: 15px;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .checkbox-item label {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background-color: #0066cc;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0052a3;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #545b62;
+    }
+
+    .results-panel {
+      margin-top: 20px;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #0066cc;
+    }
+
+    .results-count {
+      color: #0066cc;
+      font-weight: bold;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .results-table th {
+      background-color: #0066cc;
+      color: white;
+      font-weight: bold;
+    }
+
+    .results-table tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <img src="logo.png" alt="Logo Cesel" style="height: 100px; margin-bottom: 0px;">
-      <h6>V1.0.0.2</h6>
+      <img src="logo.png" alt="Logo Cesel" onerror="this.style.display='none'">
+      <h2>Filtro por Nivel (PR-NIVEL)</h2>
+      <h6>V1.0.0.3</h6>
     </div>
 
-    <div class="filters-panel">
-      <div class="filter-section">
-        <h3>Filtros de Atributos</h3>
-        <div class="filter-group">
-          <div class="filter-item">
-            <label for="pr-nivel">PR-NIVEL</label>
-            <select id="pr-nivel" multiple>
-              <option value="">Todos los niveles</option>
-            </select>
-          </div>
-
-          <div class="filter-item">
-            <label for="po-cars">PO-CARS</label>
-            <select id="po-cars" multiple>
-              <option value="">Todas las categorías</option>
-            </select>
-          </div>
-
-          <div class="filter-item">
-            <label for="po-sector">PO-SECTOR</label>
-            <select id="po-sector" multiple>
-              <option value="">Todos los sectores</option>
-            </select>
-          </div>
-
-          <div class="filter-item">
-            <label for="po-wbs">PO-WBS</label>
-            <select id="po-wbs" multiple>
-              <option value="">Todos los WBS</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-section">
-        <h3>Filtros Adicionales</h3>
-        <div class="filter-group">
-          <div class="filter-item">
-            <label for="search-text">Búsqueda por texto</label>
-            <input type="text" id="search-text" placeholder="Buscar en nombre o descripción..." />
-          </div>
-        </div>
-      </div>
-
-      <div class="button-group">
-        <button class="btn btn-primary" id="btn-aplicar">🔍 Aplicar Filtros</button>
-        <button class="btn btn-secondary" id="btn-limpiar">🗑️ Limpiar Filtros</button>
-        <!-- <button class="btn btn-secondary" id="btn-diagnostico">🔧 Diagnóstico</button> -->
+    <div class="filter-section">
+      <h3>Selecciona los niveles a filtrar</h3>
+      <div id="checkbox-container" class="checkbox-group">
+        <p style="padding: 20px; text-align: center; color: #666;">Cargando niveles...</p>
       </div>
     </div>
 
-    <label class="isolate-toggle">
-      <input type="checkbox" id="isolate-filtered" />
-      Mostrar solo elementos filtrados
-    </label>
+    <div class="button-group">
+      <button class="btn btn-primary" id="btn-aplicar">🔍 Aplicar Filtros</button>
+      <button class="btn btn-secondary" id="btn-limpiar">🗑️ Limpiar Filtros</button>
+      <button class="btn btn-secondary" id="btn-seleccionar-todos">☑️ Seleccionar Todos</button>
+    </div>
 
     <div class="results-panel">
       <div class="results-header">
-        <h3>Resultados</h3>
-        <span class="results-count" id="results-count">0 modelos encontrados</span>
+        <h3>Elementos Filtrados</h3>
+        <span class="results-count" id="results-count">0 elementos encontrados</span>
       </div>
-      <div id="loading" class="loading" style="display: none;">Cargando modelos...</div>
+      <div id="loading" class="loading" style="display: none;">Cargando elementos...</div>
       <div id="error-message" class="error" style="display: none;"></div>
-      <div id="model-grid" class="model-grid"></div>
+      <div id="results-container"></div>
     </div>
   </div>
 

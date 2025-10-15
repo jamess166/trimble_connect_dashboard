@@ -1,102 +1,88 @@
-// ui.js - Funciones para manejar la interfaz de usuario
-
-export function mostrarResultados(models) {
+export function mostrarResultados(elementos) {
   const container = document.getElementById('results-container');
-  if (!container) {
-    console.error("❌ Contenedor de resultados no encontrado");
+  const countElement = document.getElementById('results-count');
+
+  if (!container || !countElement) {
+    console.error("❌ Contenedores no encontrados");
     return;
   }
 
-  if (!models || models.length === 0) {
+  // Actualizar contador
+  countElement.textContent = `${elementos.length} elementos encontrados`;
+
+  // Si no hay elementos
+  if (elementos.length === 0) {
     container.innerHTML = `
       <div class="no-results">
-        <p>No se encontraron modelos que coincidan con los filtros aplicados.</p>
+        <p>No se encontraron elementos con los filtros seleccionados.</p>
       </div>
     `;
     return;
   }
 
+  // Crear tabla con resultados
   let html = `
-    <div class="results-header">
-      <h3>Resultados (${models.length} modelos)</h3>
-    </div>
-    <div class="results-list">
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre del Elemento</th>
+          <th>Nivel</th>
+          <th>Modelo</th>
+        </tr>
+      </thead>
+      <tbody>
   `;
 
-  models.forEach((model, index) => {
-    const attributes = model.attributes || {};
-    const attributesList = Object.entries(attributes)
-      .map(([key, values]) => `<li><strong>${key}:</strong> ${Array.isArray(values) ? values.join(', ') : values}</li>`)
-      .join('');
-
+  elementos.forEach((elemento, index) => {
     html += `
-      <div class="result-item">
-        <div class="result-header">
-          <h4>${model.name || 'Modelo sin nombre'}</h4>
-          <span class="result-index">#${index + 1}</span>
-        </div>
-        ${model.description ? `<p class="result-description">${model.description}</p>` : ''}
-        <div class="result-details">
-          <p><strong>ID:</strong> ${model.id || 'N/A'}</p>
-          <p><strong>Objetos:</strong> ${model.objects ? model.objects.length : 0}</p>
-          ${attributesList ? `
-            <div class="attributes">
-              <strong>Atributos:</strong>
-              <ul>${attributesList}</ul>
-            </div>
-          ` : ''}
-        </div>
-      </div>
+      <tr>
+        <td>${index + 1}</td>
+        <td>${elemento.objectName}</td>
+        <td><strong>${elemento.nivel}</strong></td>
+        <td>${elemento.modelName}</td>
+      </tr>
     `;
   });
 
   html += `
-    </div>
+      </tbody>
+    </table>
   `;
 
   container.innerHTML = html;
 }
 
 export function mostrarError(mensaje) {
-  const errorContainer = document.getElementById('error-container');
+  const errorContainer = document.getElementById('error-message');
+  
   if (!errorContainer) {
     console.error("❌ Contenedor de errores no encontrado");
     alert(`Error: ${mensaje}`);
     return;
   }
 
+  errorContainer.style.display = 'block';
   errorContainer.innerHTML = `
-    <div class="error-message">
-      <strong>Error:</strong> ${mensaje}
-      <button onclick="this.parentElement.remove()" class="error-close">×</button>
-    </div>
+    <strong>❌ Error:</strong> ${mensaje}
   `;
 
   // Auto-ocultar después de 10 segundos
   setTimeout(() => {
-    const errorMsg = errorContainer.querySelector('.error-message');
-    if (errorMsg) {
-      errorMsg.remove();
-    }
+    errorContainer.style.display = 'none';
   }, 10000);
 }
 
-export function limpiarError() {
-  const errorContainer = document.getElementById('error-container');
-  if (errorContainer) {
-    errorContainer.innerHTML = '';
+export function mostrarLoading() {
+  const loading = document.getElementById('loading');
+  if (loading) {
+    loading.style.display = 'block';
   }
 }
 
-// Función auxiliar para mostrar información de diagnóstico
-export function mostrarDiagnostico(info) {
-  const container = document.getElementById('results-container');
-  if (!container) return;
-
-  container.innerHTML = `
-    <div class="diagnostic-info">
-      <h3>Información de Diagnóstico</h3>
-      <pre>${JSON.stringify(info, null, 2)}</pre>
-    </div>
-  `;
+export function ocultarLoading() {
+  const loading = document.getElementById('loading');
+  if (loading) {
+    loading.style.display = 'none';
+  }
 }
